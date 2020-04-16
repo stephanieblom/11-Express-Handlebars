@@ -100,7 +100,7 @@
 
       const burgerList = await $.get( '/api/burgers');
       console.log( `  << burgerList: `, burgerList );
-      if( !burgerList ){ alert( `x SORRY API error :(` ); return; }
+      //if( !burgerList ){ alert( `x SORRY API error :(` ); return; }
 
       burgerList.forEach( function( burgerInfo, idx ){
           if(burgerInfo.devoured == 0){
