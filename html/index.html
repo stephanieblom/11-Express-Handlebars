@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tables Page</title>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+  <!-- for TOASTR -->
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+</head>
+<body>
+
+    <div class="container">
+        <div class="wrapper row">
+            <div class="col-4">
+                <h1>Available Burgers to Eat! Click on the burger to devour it!</h1>
+                <ul id="availableBurgers" class="list-group">
+
+                </ul>
+    
+            </div>
+            <div class="col-4">
+                <h1>Add a Burger!</h1>
+                <form class= "center-align col-12" id="burgerForm">
+                    <input placeholder="Add a New Burger!" id="newBurger" type="text">
+                    <button class="btn btn-lg" id="submitBtn" type="submit">Make Burger</button>
+                </form>
+            </div>
+            <div class="col-4">
+                <h1>Devoured Burgers!</h1>
+                <ul id="devouredBurgers" class="list-group"> 
+                    <li>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
+  <script>
+    function insertAvailableBurger( burgerInfo ){
+      $("#availableBurgers").append( `
+          <li class="list-group-item mt-4" id="${burgerInfo.id}">
+            <button class="btn btn-small switch-devour" type="submit" onClick="devourBurger('${burgerInfo.id}')">Devour: ${burgerInfo.burger_name}</button>
+          </li>      
+      ` );
+    }
+    function insertDevouredBurger( burgerInfo ){
+      $("#devouredBurgers").append( `
+          <li class="list-group-item mt-4">
+            ${burgerInfo.burger_name}
+          </li>      
+      ` );
+    }
+
+    function switchToDevoured( burgerInfo ){
+      $("#devouredBurgers").append( `
+          <li class="list-group-item mt-4">
+            ${burgerInfo[0].burger_name}
+          </li>      
+      ` );
+    }
+
+    function insertNewBurger( burgerInfo ){
+      $("#availableBurgers").append( `
+          <li class="list-group-item mt-4" ">
+            <button class="btn btn-small switch-devour" type="submit">Devour: ${burgerInfo}</button>
+          </li>      
+      ` );
+    }
+
+
+    $(document).ready( async function(){
+
+      $('#submitBtn').click( async function( event ){
+        event.preventDefault();
+
+        // get the user inputted info and save to object.
+        const newBurg = $('#newBurger').val();
+        console.log(`Calling api to submit new burger: `, newBurg)
+        const addNewBurg = await $.post( `/api/newBurger/${newBurg}`)
+        console.log(`New burg submitted`)
+        insertNewBurger(newBurg);
+
+        //const pullBurgerUpdate = await $.get(`/api/burgerUpdate/${id}`);
+
+        
+      });
+        
+
+        
+
+      console.log( `.. retrieving the burger list [/api/burgers]` );
+
+      const burgerList = await $.get( '/api/burgers');
+      console.log( `  << burgerList: `, burgerList );
+      if( !burgerList ){ alert( `x SORRY API error :(` ); return; }
+
+      burgerList.forEach( function( burgerInfo, idx ){
+          if(burgerInfo.devoured == 0){
+            insertAvailableBurger( burgerInfo );
+          }else{
+            insertDevouredBurger( burgerInfo );
+          }
+        
+      })
+
+
+    });    
+
+    async function devourBurger(id) {
+      event.preventDefault();
+
+      const updateBurger = await $.post(`/api/devourBurger/${id}`);
+      console.log(`Calling get function for burger updated with id: `, id)
+      const pullBurgerUpdate = await $.get(`/api/burgerUpdate/${id}`);
+      console.log(`api/devouredBurger/ returned: `, pullBurgerUpdate)
+
+      $(`#${id}`).remove();
+      switchToDevoured(pullBurgerUpdate)
+
+      }
+
+
+  </script>
+
+</body>
+</html>
